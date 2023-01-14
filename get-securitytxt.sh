@@ -28,9 +28,16 @@ fi
 security_txt=$(curl -s https://$domain/security.txt)
 well_known_security_txt=$(curl -s https://$domain/.well-known/security.txt)
 
+#Check if both files are empty
+if [[ -z $security_txt && -z $well_known_security_txt ]]; then
+    domain="www.$domain"
+    security_txt=$(curl -s https://$domain/security.txt)
+    well_known_security_txt=$(curl -s https://$domain/.well-known/security.txt)
+fi
+
+# Print the results with the URL title above it
 echo "https://$domain/security.txt:"
 echo "$security_txt"
 echo ""
 echo "https://$domain/.well-known/security.txt:"
 echo "$well_known_security_txt"
-
