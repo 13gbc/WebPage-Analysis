@@ -1,0 +1,36 @@
+#!/bin/bash
+
+url=$1
+
+if [ -z "$url" ]; then
+    echo "Usage: $0 <URL>"
+    exit 1
+fi
+
+content=$(curl -Ls $url)
+
+if [ -z "$content" ]; then
+    echo "Unable to retrieve content from $url"
+    exit 1
+fi
+
+links=$(echo "$content" | grep -oP '(?<=href=")[^"]*')
+
+declare -A seen_links
+for link in $links; do
+  if [[ "$link" == http* ]]; then
+    if [ -z "${seen_links[$link]}" ]; then
+      seen_links[$link]=1
+    fi
+  else
+    if [ -z "${seen_links[$url$link]}" ]; then
+      seen_links[$url$link]=1
+    fi
+  fi
+done
+
+sorted_links=($(echo "${!seen_links[@]}" | tr ' ' '\n' | sort))
+
+for link in "${sorted_links[@]}"; do
+    echo "$link"
+done
